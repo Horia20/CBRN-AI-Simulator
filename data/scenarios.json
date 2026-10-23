@@ -1,0 +1,105 @@
+[
+  {
+    "name": "Chlorine Release",
+    "category": "CHEMICAL",
+    "difficulty": "EASY"
+  },
+  {
+    "name": "Sarin Attack",
+    "category": "CHEMICAL",
+    "difficulty": "HARD"
+  },
+  {
+    "name": "VX Release",
+    "category": "CHEMICAL",
+    "difficulty": "EXPERT"
+  },
+  {
+    "name": "Ammonia Leak",
+    "category": "CHEMICAL",
+    "difficulty": "MEDIUM"
+  },
+  {
+    "name": "Industrial Toxic Spill",
+    "category": "CHEMICAL",
+    "difficulty": "MEDIUM"
+  },
+
+  {
+    "name": "Anthrax Outbreak",
+    "category": "BIOLOGICAL",
+    "difficulty": "MEDIUM"
+  },
+  {
+    "name": "Unknown Pathogen",
+    "category": "BIOLOGICAL",
+    "difficulty": "HARD"
+  },
+  {
+    "name": "Water Contamination",
+    "category": "BIOLOGICAL",
+    "difficulty": "MEDIUM"
+  },
+  {
+    "name": "Military Base Infection",
+    "category": "BIOLOGICAL",
+    "difficulty": "HARD"
+  },
+  {
+    "name": "Viral Epidemic",
+    "category": "BIOLOGICAL",
+    "difficulty": "EXPERT"
+  },
+
+  {
+    "name": "Dirty Bomb",
+    "category": "RADIOLOGICAL",
+    "difficulty": "HARD"
+  },
+  {
+    "name": "Lost Radioactive Source",
+    "category": "RADIOLOGICAL",
+    "difficulty": "MEDIUM"
+  },
+  {
+    "name": "Medical Source Theft",
+    "category": "RADIOLOGICAL",
+    "difficulty": "MEDIUM"
+  },
+  {
+    "name": "Transport Accident",
+    "category": "RADIOLOGICAL",
+    "difficulty": "MEDIUM"
+  },
+  {
+    "name": "Urban Exposure Event",
+    "category": "RADIOLOGICAL",
+    "difficulty": "HARD"
+  },
+
+  {
+    "name": "Nuclear Fallout",
+    "category": "NUCLEAR",
+    "difficulty": "EXPERT"
+  },
+  {
+    "name": "Reactor Failure",
+    "category": "NUCLEAR",
+    "difficulty": "EXPERT"
+  },
+  {
+    "name": "Cross Border Contamination",
+    "category": "NUCLEAR",
+    "difficulty": "HARD"
+  },
+  {
+    "name": "Power Plant Incident",
+    "category": "NUCLEAR",
+    "difficulty": "HARD"
+  },
+  {
+    "name": "Tactical Nuclear Strike",
+    "category": "NUCLEAR",
+    "difficulty": "EXPERT"
+  }
+]

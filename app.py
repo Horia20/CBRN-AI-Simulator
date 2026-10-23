@@ -1,173 +1,255 @@
 from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse
-import random
+
+from core.scenario_engine import ScenarioEngine
+from core.decision_engine import DecisionEngine
+from core.scoring_engine import ScoringEngine
+from core.aar_engine import AAREngine
 
 app = FastAPI()
 
-SCENARIOS = [
-    "Nuclear Fallout",
-    "Dirty Bomb",
-    "Sarin Release",
-    "Anthrax Outbreak",
-    "Chlorine Release"
-]
+engine = ScenarioEngine()
+decision_engine = DecisionEngine()
+scoring_engine = ScoringEngine()
+aar_engine = AAREngine()
 
-def generate_scenario():
-    return {
-        "threat": random.choice(SCENARIOS),
-        "wind": random.randint(5, 30),
-        "casualties": random.randint(10, 500),
-        "population": random.randint(1000, 10000)
-    }
+CURRENT_WORLD = engine.generate()
 
-CURRENT_SCENARIO = generate_scenario()
 
 @app.get("/", response_class=HTMLResponse)
 def home():
 
-    return f"""
-    <html>
-    <head>
-    <title>CBRN Tactical Trainer V2</title>
+    w = CURRENT_WORLD
 
-    <style>
+    return HTMLResponse(f"""
+<!DOCTYPE html>
+<html>
 
-    body {{
-        background:#0f172a;
-        color:white;
-        font-family:Arial;
-        margin:40px;
-    }}
+<head>
 
-    .card {{
-        background:#1e293b;
-        padding:20px;
-        border-radius:12px;
-        margin-bottom:20px;
-    }}
+<title>CBRN Trainer V4.2</title>
 
-    textarea {{
-        width:100%;
-        height:150px;
-    }}
+<style>
 
-    button {{
-        background:#2563eb;
-        color:white;
-        border:none;
-        padding:12px;
-        border-radius:10px;
-    }}
+body {{
+    background:#0f172a;
+    color:white;
+    font-family:Arial;
+    margin:40px;
+}}
 
-    </style>
-    </head>
+.card {{
+    background:#1e293b;
+    padding:20px;
+    border-radius:12px;
+    margin-bottom:20px;
+}}
 
-    <body>
+button {{
+    background:#2563eb;
+    color:white;
+    border:none;
+    padding:12px;
+    border-radius:10px;
+    cursor:pointer;
+}}
 
-    <h1>CBRN Tactical Trainer V2</h1>
+textarea {{
+    width:100%;
+    height:140px;
+}}
 
-    <div class="card">
-    <h2>Scenario</h2>
+</style>
 
-    <p><b>Threat:</b> {CURRENT_SCENARIO["threat"]}</p>
-    <p><b>Wind:</b> {CURRENT_SCENARIO["wind"]} km/h</p>
-    <p><b>Casualties:</b> {CURRENT_SCENARIO["casualties"]}</p>
-    <p><b>Population:</b> {CURRENT_SCENARIO["population"]}</p>
+</head>
 
-    </div>
+<body>
 
-    <div class="card">
+<h1>CBRN Tactical Trainer V4.2</h1>
 
-    <h2>Commander Decision</h2>
+<form action="/new_scenario" method="post">
 
-    <form action="/evaluate" method="post">
+<button type="submit">
+Generate New Scenario
+</button>
 
-    <textarea name="decision"></textarea>
+</form>
 
-    <br><br>
+<br>
 
-    <button type="submit">
-    Evaluate Decision
-    </button>
+<div class="card">
 
-    </form>
+<h2>Scenario</h2>
 
-    </div>
+<p><b>Name:</b> {w.scenario_name}</p>
 
-    </body>
-    </html>
-    """
+<p><b>Type:</b> {w.scenario_type}</p>
+
+<p><b>Difficulty:</b> {w.difficulty}</p>
+
+</div>
+
+<div class="card">
+
+<h2>World State</h2>
+
+<p>Population: {w.population}</p>
+
+<p>Casualties: {w.casualties}</p>
+
+<p>Contamination: {w.contamination}</p>
+
+<p>Morale: {w.morale}</p>
+
+<p>Communications: {w.communications}</p>
+
+<p>Mission Progress: {w.mission_progress}</p>
+
+</div>
+
+<div class="card">
+
+<form action="/evaluate" method="post">
+
+<h2>Commander Decision</h2>
+
+<textarea name="decision"></textarea>
+
+<br><br>
+
+<button type="submit">
+Evaluate
+</button>
+
+</form>
+
+</div>
+
+</body>
+
+</html>
+""")
+
+
+@app.post("/new_scenario", response_class=HTMLResponse)
+def new_scenario():
+
+    global CURRENT_WORLD
+
+    CURRENT_WORLD = engine.generate()
+
+    return home()
+
 
 @app.post("/evaluate", response_class=HTMLResponse)
 def evaluate(decision: str = Form(...)):
 
-    text = decision.lower()
+    global CURRENT_WORLD
 
-    score = 0
+    result = decision_engine.evaluate(
+        CURRENT_WORLD,
+        decision
+    )
 
-    if "evac" in text:
-        score += 25
+    score = scoring_engine.calculate(
+        CURRENT_WORLD
+    )
 
-    if "cbrn" in text:
-        score += 25
+    readiness = scoring_engine.readiness_level(
+        score
+    )
 
-    if "decont" in text:
-        score += 25
+    aar = aar_engine.generate(
+        CURRENT_WORLD,
+        score,
+        readiness
+    )
 
-    if "medical" in text:
-        score += 25
+    cbrn_feedback = [
+        "Contamination level assessed.",
+        "Additional reconnaissance recommended.",
+        "Protective measures should continue."
+    ]
 
-    cbrn = []
-    medical = []
-    ops = []
+    medical_feedback = [
+        "Casualty management is ongoing.",
+        "Medical evacuation remains a priority."
+    ]
 
-    if "cbrn" not in text:
-        cbrn.append("Missing CBRN reconnaissance.")
+    intel_feedback = [
+        "Threat source not fully confirmed.",
+        "Information gaps remain."
+    ]
 
-    if "decont" not in text:
-        cbrn.append("No decontamination plan.")
+    ops_feedback = [
+        "Command and control maintained.",
+        "Resources remain available."
+    ]
 
-    if "medical" not in text:
-        medical.append("Medical support not mentioned.")
+    red_team_feedback = [
+        "Contamination could spread further.",
+        "Secondary incidents remain possible."
+    ]
 
-    if "evac" not in text:
-        medical.append("Evacuation plan missing.")
+    return HTMLResponse(f"""
+<!DOCTYPE html>
+<html>
 
-    if "cordon" not in text:
-        ops.append("No security perimeter established.")
+<body style="
+background:#0f172a;
+color:white;
+font-family:Arial;
+padding:40px;">
 
-    if "reserve" not in text:
-        ops.append("No reserve force identified.")
+<h1>Assessment</h1>
 
-    return f"""
-    <html>
-    <body style="background:#0f172a;color:white;font-family:Arial;padding:40px;">
+<h2>Score: {score}</h2>
 
-    <h1>Decision Assessment</h1>
+<h2>Readiness</h2>
 
-    <h2>Score: {score}/100</h2>
+<p>{readiness}</p>
 
-    <h2>CBRN Officer</h2>
-    <ul>
-    {''.join(f'<li>{x}</li>' for x in cbrn)}
-    </ul>
+<h2>CBRN Officer</h2>
 
-    <h2>Medical Officer</h2>
-    <ul>
-    {''.join(f'<li>{x}</li>' for x in medical)}
-    </ul>
+<ul>
+{''.join(f'<li>{x}</li>' for x in cbrn_feedback)}
+</ul>
 
-    <h2>Operations Officer</h2>
-    <ul>
-    {''.join(f'<li>{x}</li>' for x in ops)}
-    </ul>
+<h2>Medical Officer</h2>
 
-    <br>
+<ul>
+{''.join(f'<li>{x}</li>' for x in medical_feedback)}
+</ul>
 
-    <a href="/" style="color:cyan;">
-    Back
-    </a>
+<h2>Intelligence Officer</h2>
 
-    </body>
-    </html>
-    """
+<ul>
+{''.join(f'<li>{x}</li>' for x in intel_feedback)}
+</ul>
+
+<h2>Operations Officer</h2>
+
+<ul>
+{''.join(f'<li>{x}</li>' for x in ops_feedback)}
+</ul>
+
+<h2>Red Team</h2>
+
+<ul>
+{''.join(f'<li>{x}</li>' for x in red_team_feedback)}
+</ul>
+
+<h2>After Action Review</h2>
+
+<pre>{aar}</pre>
+
+<br><br>
+
+<a href="/" style="color:cyan;">
+Back
+</a>
+
+</body>
+
+</html>
+""")
